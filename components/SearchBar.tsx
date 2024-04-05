@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SearchManufacturer } from "./";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const SearchButton = ({ otherStyles }: { otherStyles: string }) => {
   return (
@@ -22,7 +23,39 @@ const SearchBar = () => {
   const [manufacturer, setManufacturer] = useState("");
   const [model, setModel] = useState("");
 
-  const handleSearch = () => {};
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (manufacturer === "" && model === "") {
+      return alert("Please fill in the search bar");
+    }
+
+    updateSearchParams(manufacturer, model);
+  };
+
+  const updateSearchParams = (manaufacturer: string, model: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+
+    if (model) {
+      searchParams.set("model", model.toLowerCase());
+    } else {
+      searchParams.delete("model");
+    }
+
+    if (manaufacturer) {
+      searchParams.set("manufacturer", manufacturer.toLowerCase());
+    } else {
+      searchParams.delete("manufacturer");
+    }
+
+    const newPathname = `${
+      window.location.pathname
+    }?${searchParams.toString()}`;
+
+    router.push(newPathname, { scroll: false });
+  };
 
   return (
     <form className="searchbar" onSubmit={handleSearch}>
@@ -32,6 +65,8 @@ const SearchBar = () => {
           setManufacturer={setManufacturer}
         />
       </div>
+      <SearchButton otherStyles="sm:hidden" />
+
       <div className="searchbar__item">
         <Image
           src="/model-icon.png"
